@@ -1,0 +1,69 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-store/
+
+# Frontend build artifacts
+/frontend/build/
+/build/
+/dist/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+env/
+venv/
+.venv/
+backend/venv/
+pip-wheel-metadata/
+.pytest_cache/
+.mypy_cache/
+.tox/
+.coverage
+.coverage.*
+.cache
+
+# Environment variables / secrets
+.env
+*.secret
+
+# Database files
+db/data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# Packaging
+*.egg-info/
+.eggs/
+*.egg
+
+# Docker
+docker-compose.override.yml
+.docker/
+.dockerignore
+
+# Misc
+*.tmp
+*.temp
+.idea/
+
+# Ensure lockfiles are tracked (do NOT ignore package-lock.json)
+# package-lock.json

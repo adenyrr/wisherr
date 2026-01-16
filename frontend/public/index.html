@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+    <meta name="theme-color" content="#4F46E5" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Wisherr" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta
+      name="description"
+      content="Wisherr - Créez et partagez vos listes de souhaits avec vos proches. Anniversaires, Noël, Mariages et plus encore."
+    />
+    <meta name="keywords" content="wishlist, liste de souhaits, cadeau, anniversaire, noël, mariage, partage" />
+    <meta name="author" content="Wisherr" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Wisherr - Listes de souhaits" />
+    <meta property="og:description" content="Créez et partagez vos listes de souhaits avec vos proches" />
+    <meta property="og:image" content="%PUBLIC_URL%/logo512.png" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Wisherr - Listes de souhaits" />
+    <meta name="twitter:description" content="Créez et partagez vos listes de souhaits avec vos proches" />
+    
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    
+    <!-- Google Font: Inclusive Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inclusive+Sans:wght@400;700&display=swap" rel="stylesheet">
+    
+    <title>Wisherr - Listes de souhaits</title>
+    
+    <!-- PWA: Splash screen for iOS -->
+    <style>
+      html, body, #root {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: #111827;
+      }
+      /* Safe area insets for notched devices */
+      body {
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      }
+    </style>
+  </head>
+  <body>
+    <noscript>Vous devez activer JavaScript pour utiliser cette application.</noscript>
+    <div id="root"></div>
+    <script>
+      // Affiche les erreurs JS directement dans la page pour faciliter le debug en production
+      window.addEventListener('error', function (e) {
+          try {
+          var msg = e && e.message ? e.message : String(e);
+          var file = e && e.filename ? e.filename : '';
+          var line = e && e.lineno ? ':' + e.lineno : '';
+          var details = { message: msg, file: file, line: line, stack: (e && e.error && e.error.stack) ? e.error.stack : '' };
+          document.body.innerHTML = '<pre style="white-space:pre-wrap;color:#c00;background:#fff;padding:1rem;font-family:monospace;">' + msg + '\n' + file + line + '</pre>';
+          try { fetch('/__client_error__', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(details) }).catch(()=>{}); } catch(err) {}
+        } catch (err) { /* ignore */ }
+        console.error(e.error || e.message || e);
+      });
+      window.addEventListener('unhandledrejection', function (e) {
+        try {
+          var reason = e && e.reason ? e.reason : String(e);
+          var details = { message: 'Unhandled Rejection: ' + reason, stack: (e && e.reason && e.reason.stack) ? e.reason.stack : '' };
+          document.body.innerHTML = '<pre style="white-space:pre-wrap;color:#c00;background:#fff;padding:1rem;font-family:monospace;">Unhandled Rejection:\n' + reason + '</pre>';
+          try { fetch('/__client_error__', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(details) }).catch(()=>{}); } catch(err) {}
+        } catch (err) { /* ignore */ }
+        console.error('Unhandled Rejection', e.reason || e);
+      });
+    </script>
+    <!--
+      This HTML file is a template.
+      If you open it directly in the browser, you will see an empty page.
+
+      You can add webfonts, meta tags, or analytics to this file.
+      The build step will place the bundled scripts into the <body> tag.
+
+      To begin the development, run `npm start` or `yarn start`.
+      To create a production bundle, use `npm run build` or `yarn build`.
+    -->
+  </body>
+</html>

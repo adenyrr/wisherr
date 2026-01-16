@@ -1,0 +1,1 @@
+# Schémas globaux (si besoin)

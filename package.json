@@ -1,0 +1,17 @@
+{
+  "name": "wisherr",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Wisherr - Application de gestion de listes de souhaits",
+  "scripts": {
+    "frontend": "cd frontend && npm start",
+    "frontend:build": "cd frontend && npm run build",
+    "backend": "cd backend && poetry run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:build": "docker-compose build"
+  },
+  "workspaces": [
+    "frontend"
+  ]
+}

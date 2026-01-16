@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: wisherr
+      POSTGRES_USER: wisherr
+      POSTGRES_PASSWORD: wisherr
+    volumes:
+      - ./db/data:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      SECRET_KEY: ${SECRET_KEY}
+      ENABLE_LOCAL_AUTH: ${ENABLE_LOCAL_AUTH}
+      ENABLE_OIDC_AUTH: ${ENABLE_OIDC_AUTH}
+      LOCALE: ${LOCALE}
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/app:/app/app
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        REACT_APP_API_URL: ${REACT_APP_API_URL}
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    environment:
+      # - REACT_APP_API_URL=http://backend:8000  # Commented out to use nginx proxy
+      - REACT_APP_API_URL=
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend

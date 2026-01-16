@@ -1,0 +1,50 @@
+{
+  "short_name": "Wisherr",
+  "name": "Wisherr - Listes de souhaits",
+  "description": "Créez et partagez vos listes de souhaits avec vos proches",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#4F46E5",
+  "background_color": "#111827",
+  "categories": ["lifestyle", "shopping"],
+  "lang": "fr-FR",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Mes listes",
+      "short_name": "Listes",
+      "description": "Voir mes listes de souhaits",
+      "url": "/wishlists/mine",
+      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Créer une liste",
+      "short_name": "Nouvelle",
+      "description": "Créer une nouvelle liste",
+      "url": "/wishlists/mine?new=true",
+      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
+    }
+  ]
+}
