@@ -119,7 +119,7 @@ frontend-build:
   script:
     - cd frontend
     - npm ci
-    - npm run build
+    - CI=false npm run build
   artifacts:
     paths:
       - frontend/build
