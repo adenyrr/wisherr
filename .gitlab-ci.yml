@@ -73,6 +73,7 @@ backend-tests:
   variables:
     DATABASE_URL: "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$POSTGRES_DB"
   before_script:
+    - cd backend
     - python -m pip install --upgrade pip
     - pip install poetry
     - poetry config virtualenvs.create false
