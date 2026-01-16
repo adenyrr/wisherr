@@ -38,6 +38,9 @@ backend-lint:
   image: python:3.11-slim
   stage: lint
   before_script:
+    - echo "Diagnostic - Répertoire courant:"
+    - pwd
+    - ls -la
     - python -m pip install --upgrade pip
     - pip install ruff
   script:
@@ -79,7 +82,6 @@ backend-tests:
     - poetry config virtualenvs.create false
     - poetry install --no-interaction --no-ansi
   script:
-    - cd backend
     - mkdir -p reports
     - poetry run pytest -q --junitxml=reports/junit.xml || true
   artifacts:
@@ -99,7 +101,8 @@ backend-security:
     - python -m pip install --upgrade pip
     - pip install bandit
   script:
-    - bandit -r backend/app -f json -o backend/bandit-report.json || true
+    - cd backend
+    - bandit -r app -f json -o bandit-report.json || true
   artifacts:
     when: always
     expire_in: 1 week
@@ -147,13 +150,14 @@ docker-build:
   variables:
     DOCKER_HOST: tcp://docker:2375/
     DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - echo "Building Docker images with tag ${CI_COMMIT_SHORT_SHA}"
+    - docker info
   script:
-    - docker build -t ${DOCKER_IMAGE_PREFIX}/wisherr-backend:${CI_COMMIT_SHORT_SHA} backend
-    - docker build -t ${DOCKER_IMAGE_PREFIX}/wisherr-frontend:${CI_COMMIT_SHORT_SHA} -f frontend/Dockerfile.prod frontend
-  artifacts:
-    expire_in: 1 week
-    paths:
-      - frontend/build
+    - docker build -t ${DOCKER_IMAGE_PREFIX}/wisherr-backend:${CI_COMMIT_SHORT_SHA} ./backend
+    - docker build -t ${DOCKER_IMAGE_PREFIX}/wisherr-frontend:${CI_COMMIT_SHORT_SHA} -f ./frontend/Dockerfile.prod ./frontend
+    - docker tag ${DOCKER_IMAGE_PREFIX}/wisherr-backend:${CI_COMMIT_SHORT_SHA} ${DOCKER_IMAGE_PREFIX}/wisherr-backend:latest
+    - docker tag ${DOCKER_IMAGE_PREFIX}/wisherr-frontend:${CI_COMMIT_SHORT_SHA} ${DOCKER_IMAGE_PREFIX}/wisherr-frontend:latest
   only:
     - main
     - master
@@ -172,11 +176,18 @@ docker-push:
   variables:
     DOCKER_HOST: tcp://docker:2375/
     DOCKER_TLS_CERTDIR: ""
-  script:
-    - echo "Logging in to registry"
+  dependencies:
+    - docker-build
+  before_script:
+    - echo "Logging in to registry ${CI_REGISTRY}"
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+  script:
+    - docker build -t ${DOCKER_IMAGE_PREFIX}/wisherr-backend:${CI_COMMIT_SHORT_SHA} ./backend
+    - docker build -t ${DOCKER_IMAGE_PREFIX}/wisherr-frontend:${CI_COMMIT_SHORT_SHA} -f ./frontend/Dockerfile.prod ./frontend
     - docker tag ${DOCKER_IMAGE_PREFIX}/wisherr-backend:${CI_COMMIT_SHORT_SHA} ${DOCKER_IMAGE_PREFIX}/wisherr-backend:latest
     - docker tag ${DOCKER_IMAGE_PREFIX}/wisherr-frontend:${CI_COMMIT_SHORT_SHA} ${DOCKER_IMAGE_PREFIX}/wisherr-frontend:latest
+    - docker push ${DOCKER_IMAGE_PREFIX}/wisherr-backend:${CI_COMMIT_SHORT_SHA}
+    - docker push ${DOCKER_IMAGE_PREFIX}/wisherr-frontend:${CI_COMMIT_SHORT_SHA}
     - docker push ${DOCKER_IMAGE_PREFIX}/wisherr-backend:latest
     - docker push ${DOCKER_IMAGE_PREFIX}/wisherr-frontend:latest
   only:
