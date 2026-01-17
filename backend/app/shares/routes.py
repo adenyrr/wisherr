@@ -33,6 +33,7 @@ class ShareCreateInternal(BaseModel):
     target_type: Optional[str] = None  # "group" ou "user"
     target_id: Optional[int] = None  # group_id ou user_id
     permission: str = "viewer"  # viewer ou editor
+    notify_on_reservation: bool = False  # Notifier le propriétaire des réservations
 
 class ShareCreateExternal(BaseModel):
     wishlist_id: int
@@ -354,7 +355,8 @@ async def create_internal_share(
         target_group_id=target_group_id,
         target_user_id=target_user_id,
         permission=payload.permission,
-        created_by=current_user.id
+        created_by=current_user.id,
+        notify_on_reservation=payload.notify_on_reservation
     )
     session.add(share)
     await session.commit()
@@ -476,9 +478,10 @@ async def create_external_share(
     await session.commit()
     await session.refresh(share)
     
+    share_url = f"{WISHERR_URL}/shared/{share.share_token}"
     await log_activity(
         session, current_user.id, "list_shared_external", "share", share.id,
-        wishlist_title, wishlist_id
+        wishlist_title, wishlist_id, {"share_url": share_url, "share_token": share.share_token}
     )
     await session.commit()
     await session.refresh(share)  # Refresh après commit pour éviter MissingGreenlet
@@ -639,8 +642,9 @@ async def get_external_share_info(
 ):
     """Récupérer les infos d'un partage externe (sans auth, sans contenu)"""
     result = await session.exec(
-        select(WishlistShare, Wishlist)
+        select(WishlistShare, Wishlist, User)
         .join(Wishlist, Wishlist.id == WishlistShare.wishlist_id)
+        .join(User, User.id == Wishlist.owner_id)
         .where(WishlistShare.share_token == token)
     )
     row = result.first()
@@ -648,7 +652,7 @@ async def get_external_share_info(
     if not row:
         raise HTTPException(status_code=404, detail="Lien de partage invalide")
     
-    share, wishlist = row
+    share, wishlist, owner = row
     
     if not share.is_active:
         raise HTTPException(status_code=403, detail="Ce partage a été désactivé")
@@ -661,7 +665,8 @@ async def get_external_share_info(
         "wishlist_description": wishlist.description,
         "requires_password": share.share_password_hash is not None,
         "occasion": wishlist.occasion,
-        "event_date": wishlist.event_date
+        "event_date": wishlist.event_date,
+        "owner_name": owner.username
     }
 
 @router.post("/external/{token}/access", response_model=ExternalAccessResponse)
@@ -706,6 +711,10 @@ async def access_external_share(
     )
     items = items_result.all()
     
+    # Les utilisateurs externes (partagés) voient TOUJOURS le statut de réservation
+    # car ils ne sont pas le propriétaire - la logique notify_owner_on_reservation
+    # ne s'applique qu'au propriétaire
+    
     return ExternalAccessResponse(
         valid=True,
         wishlist_id=wishlist.id,
@@ -719,7 +728,8 @@ async def access_external_share(
                 "image_url": item.image_url,
                 "price": item.price,
                 "status": item.status,
-                "reserved_by_name": item.reserved_by_name
+                "reserved_by_name": item.reserved_by_name,
+                "custom_attributes": item.custom_attributes or {}
             }
             for item in items
         ]

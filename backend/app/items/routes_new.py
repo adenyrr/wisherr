@@ -210,8 +210,8 @@ async def log_activity(session: AsyncSession, user_id: int, action_type: str,
     )
     session.add(activity)
 
-def item_to_response(item: Item, category: ItemCategory = None, priority: ItemPriority = None, hide_reservation_status: bool = False) -> ItemOut:
-    # Si hide_reservation_status est True, on masque le statut reserved au propriétaire
+def item_to_response(item: Item, category: ItemCategory = None, priority: ItemPriority = None, hide_reservation_status: bool = False, current_user_id: int = None) -> ItemOut:
+    # Si hide_reservation_status est True (propriétaire avec notify=false), masquer le statut reserved
     status = item.status
     reserved_by_name = item.reserved_by_name
     reserved_at = item.reserved_at
@@ -289,10 +289,16 @@ async def list_items(
     """Lister les articles d'une liste"""
     wishlist, role = await check_wishlist_access(session, wishlist_id, current_user)
     
-    # Déterminer si on doit masquer le statut reserved au propriétaire
-    # Le propriétaire ne voit les réservations que si notify_owner_on_reservation est activé
+    # Logique du tag Réservé:
+    # - Si notify_owner_on_reservation = false: propriétaire NE voit PAS le statut, partagés et réservateur voient
+    # - Si notify_owner_on_reservation = true: tout le monde voit
+    notify_enabled = getattr(wishlist, 'notify_owner_on_reservation', True)
+    if notify_enabled is None:
+        notify_enabled = True
+    
     is_owner = (wishlist.owner_id == current_user.id)
-    hide_reservation_status = is_owner and not getattr(wishlist, 'notify_owner_on_reservation', True)
+    # Masquer uniquement pour le propriétaire si notify est désactivé
+    hide_reservation_status = is_owner and not notify_enabled
     
     query = select(Item).where(Item.wishlist_id == wishlist_id)
     if status_filter:
@@ -319,7 +325,7 @@ async def list_items(
         if item.priority_id:
             prio_result = await session.exec(select(ItemPriority).where(ItemPriority.id == item.priority_id))
             priority = prio_result.first()
-        responses.append(item_to_response(item, category, priority, hide_reservation_status))
+        responses.append(item_to_response(item, category, priority, hide_reservation_status, current_user.id))
     
     return responses
 
@@ -363,7 +369,7 @@ async def create_item(
     
     await log_activity(
         session, current_user.id, "item_added", "item", item.id, item.name,
-        wishlist_id, {"price": payload.price}
+        wishlist_id, {"price": payload.price, "item_url": payload.url, "wishlist_id": wishlist_id}
     )
     await session.commit()
     
@@ -378,6 +384,13 @@ async def get_item(
     """Récupérer un article"""
     item, wishlist, role = await check_item_access(session, item_id, current_user)
     
+    # Même logique: masquer uniquement pour le propriétaire si notify=false
+    notify_enabled = getattr(wishlist, 'notify_owner_on_reservation', True)
+    if notify_enabled is None:
+        notify_enabled = True
+    is_owner = (wishlist.owner_id == current_user.id)
+    hide_reservation_status = is_owner and not notify_enabled
+    
     category = None
     priority = None
     if item.category_id:
@@ -387,7 +400,7 @@ async def get_item(
         prio_result = await session.exec(select(ItemPriority).where(ItemPriority.id == item.priority_id))
         priority = prio_result.first()
     
-    return item_to_response(item, category, priority)
+    return item_to_response(item, category, priority, hide_reservation_status, current_user.id)
 
 @router.put("/{item_id}", response_model=ItemOut)
 async def update_item(
@@ -399,6 +412,13 @@ async def update_item(
     """Modifier un article"""
     item, wishlist, role = await check_item_access(session, item_id, current_user, require_edit=True)
     wishlist_id = wishlist.id  # Stocker avant commit
+    
+    # Même logique: masquer uniquement pour le propriétaire si notify=false
+    notify_enabled = getattr(wishlist, 'notify_owner_on_reservation', True)
+    if notify_enabled is None:
+        notify_enabled = True
+    is_owner = (wishlist.owner_id == current_user.id)
+    hide_reservation_status = is_owner and not notify_enabled
     
     if payload.name is not None:
         item.name = payload.name
@@ -424,8 +444,8 @@ async def update_item(
     await session.commit()
     await session.refresh(item)
     
-    # Construire la réponse avant log_activity
-    response = item_to_response(item)
+    # Construire la réponse avant log_activity avec logique de masquage
+    response = item_to_response(item, None, None, hide_reservation_status, current_user.id)
     
     await log_activity(
         session, current_user.id, "item_updated", "item", item.id, item.name,

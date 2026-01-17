@@ -1,5 +1,11 @@
 name: wisherr
 services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: wisherr-backend:local
+  
   frontend:
     build:
       context: ./frontend

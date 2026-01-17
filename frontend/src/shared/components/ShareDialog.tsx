@@ -98,6 +98,9 @@ export default function ShareDialog({
           }
           payload.group_id = selectedGroupId;
         }
+        
+        // Ajouter l'option de notification
+        payload.notify_on_reservation = notifyOnReservation;
 
         await api.post('/shares/internal', payload);
         showSuccess('Liste partagée avec succès !');
@@ -423,6 +426,27 @@ export default function ShareDialog({
                         <LucideIcon name="edit" size={18} className="inline-block mr-2" />
                         {t('Éditeur')}
                       </button>
+                    </div>
+                  </div>
+
+                  {/* Notification option for internal shares */}
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-800/50 border border-white/5">
+                    <button
+                      type="button"
+                      onClick={() => setNotifyOnReservation(!notifyOnReservation)}
+                      className={`w-12 h-6 rounded-full transition-colors relative ${
+                        notifyOnReservation ? 'bg-indigo-500' : 'bg-gray-600'
+                      }`}
+                    >
+                      <span
+                        className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
+                          notifyOnReservation ? 'left-7' : 'left-1'
+                        }`}
+                      />
+                    </button>
+                    <div>
+                      <p className="text-sm text-white">{t('Notifications de réservation')}</p>
+                      <p className="text-xs text-gray-400">{t('Recevoir un email quand quelqu\'un réserve un article')}</p>
                     </div>
                   </div>
                 </div>

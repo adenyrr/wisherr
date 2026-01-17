@@ -20,7 +20,6 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Rediriger si déjà connecté
   useEffect(() => {
     if (token) {
       navigate('/dashboard', { replace: true });
@@ -32,7 +31,6 @@ export default function Register() {
     setError('');
     setSuccess(false);
 
-    // Validation mot de passe
     if (password !== confirmPassword) {
       setError(t('Les mots de passe ne correspondent pas'));
       return;
@@ -55,38 +53,94 @@ export default function Register() {
     }
   };
 
-  return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800">
-      {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full">
-          {/* Logo & Branding */}
-          <div className="text-center mb-8">
-            <div className="flex justify-center mb-6">
-              <WisherrBanner size="lg" className="max-w-xs" />
+  if (success) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-900">
+        <div className="flex-1 flex items-center justify-center px-4 py-8">
+          <div className="text-center max-w-md space-y-6">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-500/20 mb-4">
+              <LucideIcon name="check-circle" className="w-10 h-10 text-green-400" />
             </div>
-            <p className="text-gray-400">{t('Créez votre compte')}</p>
+            <h2 className="text-3xl font-bold text-white">{t('Inscription réussie !')}</h2>
+            <p className="text-gray-400 text-lg">
+              {t('Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.')}
+            </p>
+            <Link
+              to="/login"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-purple-500/25"
+            >
+              <LucideIcon name="log-in" className="w-5 h-5" />
+              {t('Se connecter')}
+            </Link>
           </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
-          {/* Register Card */}
-          <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-8 shadow-xl">
-            {success ? (
-              <div className="text-center py-8">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/20 mb-4">
-                  <LucideIcon name="check-circle" className="w-8 h-8 text-emerald-400" />
+  return (
+    <div className="min-h-screen flex flex-col bg-gray-900">
+      <div className="flex-1 grid lg:grid-cols-2">
+        <div className="hidden lg:flex flex-col justify-center px-8 xl:px-16 2xl:px-24 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+          <div className="max-w-xl">
+            <div className="mb-8">
+              <WisherrBanner size="lg" />
+            </div>
+            <h1 className="text-4xl xl:text-5xl 2xl:text-6xl font-bold text-white leading-tight mb-6">
+              {t('Rejoignez')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Wisherr</span>
+            </h1>
+            <p className="text-lg xl:text-xl text-gray-400 mb-12">
+              {t('Créez votre compte gratuitement et commencez à partager vos souhaits avec vos proches.')}
+            </p>
+            
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                  <LucideIcon name="zap" className="w-6 h-6 text-emerald-400" />
                 </div>
-                <h2 className="text-xl font-semibold text-white mb-2">{t('Inscription réussie !')}</h2>
-                <p className="text-gray-400 mb-6">{t('Vous pouvez maintenant vous connecter')}</p>
-                <Link
-                  to="/login"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-medium rounded-xl shadow-lg shadow-indigo-500/25 transition-all"
-                >
-                  <LucideIcon name="log-in" className="w-5 h-5" />
-                  {t('Se connecter')}
-                </Link>
+                <div>
+                  <h3 className="text-white font-semibold mb-1">{t('Rapide')}</h3>
+                  <p className="text-sm text-gray-500">{t('Inscription en 2 minutes')}</p>
+                </div>
               </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                  <LucideIcon name="shield-check" className="w-6 h-6 text-blue-400" />
+                </div>
+                <div>
+                  <h3 className="text-white font-semibold mb-1">{t('Sécurisé')}</h3>
+                  <p className="text-sm text-gray-500">{t('Vos données protégées')}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                  <LucideIcon name="gift" className="w-6 h-6 text-amber-400" />
+                </div>
+                <div>
+                  <h3 className="text-white font-semibold mb-1">{t('Gratuit')}</h3>
+                  <p className="text-sm text-gray-500">{t('100% gratuit à vie')}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col justify-center px-4 py-8 sm:px-8 md:px-12 lg:px-8 xl:px-16 2xl:px-24 bg-gray-900">
+          <div className="w-full max-w-md mx-auto lg:mx-0 lg:max-w-none">
+            <div className="lg:hidden flex justify-center mb-8">
+              <WisherrBanner size="lg" />
+            </div>
+
+            <div className="lg:max-w-md">
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2 text-center lg:text-left">
+                {t('Créer un compte')}
+              </h2>
+              <p className="text-gray-400 mb-8 text-center lg:text-left">
+                {t('Remplissez le formulaire ci-dessous')}
+              </p>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     {t("Nom d'utilisateur")}
@@ -100,8 +154,9 @@ export default function Register() {
                       value={username}
                       onChange={e => setUsername(e.target.value)}
                       placeholder={t("Choisissez un nom d'utilisateur")}
-                      className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                      className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
                       required
+                      autoFocus
                     />
                   </div>
                 </div>
@@ -119,7 +174,7 @@ export default function Register() {
                       value={email}
                       onChange={e => setEmail(e.target.value)}
                       placeholder="exemple@email.com"
-                      className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                      className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
                       required
                     />
                   </div>
@@ -138,13 +193,11 @@ export default function Register() {
                       value={password}
                       onChange={e => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                      className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
                       required
                     />
                   </div>
-                  <p className="mt-1 text-xs text-gray-500">
-                    {t('Min. 8 caractères, 1 majuscule, 1 chiffre, 1 caractère spécial')}
-                  </p>
+                  <p className="mt-1 text-xs text-gray-500">{t('Min. 8 caractères')}</p>
                 </div>
 
                 <div>
@@ -160,14 +213,14 @@ export default function Register() {
                       value={confirmPassword}
                       onChange={e => setConfirmPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                      className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
                       required
                     />
                   </div>
                 </div>
 
                 {error && (
-                  <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400">
+                  <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400">
                     <LucideIcon name="alert-circle" className="w-5 h-5 flex-shrink-0" />
                     <span className="text-sm">{error}</span>
                   </div>
@@ -176,7 +229,7 @@ export default function Register() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-medium rounded-xl shadow-lg shadow-indigo-500/25 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-3.5 px-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold rounded-xl transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-purple-500/25"
                 >
                   {loading ? (
                     <>
@@ -191,24 +244,21 @@ export default function Register() {
                   )}
                 </button>
               </form>
-            )}
 
-            {!success && (
-              <div className="mt-6 pt-6 border-t border-white/10 text-center">
+              <div className="mt-8 pt-6 border-t border-white/10 text-center lg:text-left">
                 <p className="text-gray-400">
                   {t('Déjà un compte ?')}{' '}
-                  <Link to="/login" className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
+                  <Link to="/login" className="text-purple-400 hover:text-purple-300 font-semibold transition-colors">
                     {t('Se connecter')}
                   </Link>
                 </p>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
-
-      {/* Footer */}
-      <Footer siteTitle={siteTitle} />
+      
+      <Footer />
     </div>
   );
 }

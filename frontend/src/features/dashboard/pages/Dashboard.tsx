@@ -48,11 +48,11 @@ export default function Dashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      const [activitiesRes, wishlistsRes, groupsRes, sharesRes] = await Promise.all([
+      const [activitiesRes, wishlistsRes, groupsRes, mySharesRes] = await Promise.all([
         api.get('/activities/feed?limit=10').catch(() => ({ data: [] })),
         api.get('/wishlists/mine').catch(() => ({ data: [] })),
         api.get('/groups').catch(() => ({ data: [] })),
-        api.get('/shares/shared-with-me').catch(() => ({ data: [] }))
+        api.get('/shares').catch(() => ({ data: [] }))  // Partages créés par l'utilisateur
       ]);
 
       setActivities(activitiesRes.data || []);
@@ -63,7 +63,7 @@ export default function Dashboard() {
       setStats({
         totalLists: lists.length,
         totalItems,
-        sharedWithMe: (sharesRes.data || []).length,
+        sharedWithMe: (mySharesRes.data || []).length,  // Nombre de partages émis
         myGroups: (groupsRes.data || []).length
       });
     } catch (err) {
@@ -90,46 +90,53 @@ export default function Dashboard() {
   };
 
   const formatActivityMessage = (activity: Activity) => {
-    const actor = activity.user_id === currentUser?.id ? 'Vous avez' : `${activity.username || 'Quelqu\'un'} a`;
+    const isMe = activity.user_id === currentUser?.id;
+    const actor = activity.username || 'Quelqu\'un';
     const targetName = activity.target_name || activity.wishlist_title || '';
     
     switch (activity.action_type) {
       case 'list_created':
-        return `${actor} créé la liste « ${targetName} »`;
+        return isMe ? `Liste « ${targetName} » créée` : `${actor} a créé la liste « ${targetName} »`;
       case 'list_updated':
-        return `${actor} modifié la liste « ${targetName} »`;
+        return isMe ? `Liste « ${targetName} » modifiée` : `${actor} a modifié la liste « ${targetName} »`;
       case 'list_deleted':
-        return `${actor} supprimé la liste « ${targetName} »`;
+        return isMe ? `Liste « ${targetName} » supprimée` : `${actor} a supprimé la liste « ${targetName} »`;
       case 'item_added':
-        return `${actor} ajouté « ${targetName} »`;
+        return isMe ? `« ${targetName} » ajouté` : `${actor} a ajouté « ${targetName} »`;
       case 'item_updated':
-        return `${actor} modifié « ${targetName} »`;
+        return isMe ? `« ${targetName} » modifié` : `${actor} a modifié « ${targetName} »`;
       case 'item_deleted':
-        return `${actor} supprimé « ${targetName} »`;
+        return isMe ? `« ${targetName} » supprimé` : `${actor} a supprimé « ${targetName} »`;
       case 'item_reserved':
-        return `${actor} réservé « ${targetName} »`;
+        return isMe ? `« ${targetName} » réservé` : `${actor} a réservé « ${targetName} »`;
       case 'item_purchased':
-        return `${actor} marqué « ${targetName} » comme acheté`;
+        return isMe ? `« ${targetName} » marqué comme acheté` : `${actor} a acheté « ${targetName} »`;
       case 'group_created':
-        return `${actor} créé le groupe « ${targetName} »`;
+        return isMe ? `Groupe « ${targetName} » créé` : `${actor} a créé le groupe « ${targetName} »`;
       case 'group_deleted':
-        return `${actor} supprimé le groupe « ${targetName} »`;
+        return isMe ? `Groupe « ${targetName} » supprimé` : `${actor} a supprimé le groupe « ${targetName} »`;
       case 'member_added':
-        return `${actor} ajouté un membre au groupe « ${targetName} »`;
+        return isMe ? `Membre ajouté au groupe « ${targetName} »` : `${actor} a ajouté un membre au groupe « ${targetName} »`;
       case 'member_removed':
-        return `${actor} retiré un membre du groupe « ${targetName} »`;
+        return isMe ? `Membre retiré du groupe « ${targetName} »` : `${actor} a retiré un membre du groupe « ${targetName} »`;
       case 'list_shared':
-        return `${actor} partagé « ${targetName} »`;
+        return isMe ? `« ${targetName} » partagée` : `${actor} a partagé « ${targetName} »`;
       case 'list_shared_external':
-        return `${actor} créé un lien de partage pour « ${targetName} »`;
+        return isMe ? `Lien de partage créé pour « ${targetName} »` : `${actor} a créé un lien de partage pour « ${targetName} »`;
       case 'user_login':
-        return `${actor} connecté`;
+        return isMe ? 'Connexion' : `${actor} s'est connecté`;
       case 'login_failed':
-        return `Tentative de connexion échouée pour ${targetName}`;
+        return `Échec de connexion pour ${targetName}`;
       case 'user_registered':
-        return `${actor} créé son compte`;
+        return isMe ? 'Compte créé' : `${actor} a créé son compte`;
+      case 'wishlist_created':
+        return isMe ? `Liste « ${targetName} » créée` : `${actor} a créé la liste « ${targetName} »`;
+      case 'wishlist_updated':
+        return isMe ? `Liste « ${targetName} » modifiée` : `${actor} a modifié la liste « ${targetName} »`;
+      case 'wishlist_deleted':
+        return isMe ? `Liste « ${targetName} » supprimée` : `${actor} a supprimé la liste « ${targetName} »`;
       default:
-        return activity.action_label || `${actor} ${activity.action_type.replace(/_/g, ' ')}`;
+        return activity.action_label || activity.action_type.replace(/_/g, ' ');
     }
   };
 
@@ -170,7 +177,7 @@ export default function Dashboard() {
               </div>
               <div className="text-left">
                 <p className="text-2xl font-bold text-white">{stats.totalLists}</p>
-                <p className="text-sm text-gray-400">{t('Mes listes')}</p>
+                <p className="text-sm text-gray-400">{t('Listes')}</p>
               </div>
             </div>
           </button>
@@ -191,7 +198,7 @@ export default function Dashboard() {
           </button>
 
           <button
-            onClick={() => navigate('/wishlists/shared')}
+            onClick={() => navigate('/shares')}
             className="p-6 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 hover:border-emerald-400/50 transition-all group"
           >
             <div className="flex items-center gap-4">
@@ -200,7 +207,7 @@ export default function Dashboard() {
               </div>
               <div className="text-left">
                 <p className="text-2xl font-bold text-white">{stats.sharedWithMe}</p>
-                <p className="text-sm text-gray-400">{t('Partagées')}</p>
+                <p className="text-sm text-gray-400">{t('Partages')}</p>
               </div>
             </div>
           </button>

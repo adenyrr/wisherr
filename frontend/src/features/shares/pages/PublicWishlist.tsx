@@ -14,6 +14,12 @@ interface Item {
   price?: number;
   status?: string;
   reserved_by_name?: string;
+  custom_attributes?: {
+    tag_color?: string;
+    tag_model?: string;
+    tag_size?: string;
+    tag_quantity?: string;
+  };
 }
 
 interface ShareInfo {
@@ -22,6 +28,7 @@ interface ShareInfo {
   requires_password: boolean;
   occasion?: string;
   event_date?: string;
+  owner_name?: string;
 }
 
 export default function PublicWishlist() {
@@ -169,16 +176,26 @@ export default function PublicWishlist() {
 
   if (!accessGranted && shareInfo?.requires_password) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 flex flex-col">
+      <div className="min-h-screen bg-gray-900 flex flex-col">
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="bg-gray-800/50 backdrop-blur-xl rounded-2xl p-8 max-w-md w-full border border-white/10">
+            {/* Bannière Wisherr */}
+            <div className="flex justify-center mb-6">
+              <img src="/wisherr-banner.png" alt="Wisherr" className="h-10" />
+            </div>
+            
             <div className="text-center mb-6">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500/30 to-pink-500/30 flex items-center justify-center">
                 <LucideIcon name="gift" size={32} className="text-purple-400" />
               </div>
               <h1 className="text-2xl font-bold text-white mb-2">{shareInfo.wishlist_title}</h1>
+              {shareInfo.owner_name && (
+                <p className="text-gray-400 text-sm mb-2">
+                  {t('Liste de')} <span className="text-purple-400 font-medium">{shareInfo.owner_name}</span>
+                </p>
+              )}
               {shareInfo.wishlist_description && (
-                <p className="text-gray-400 text-sm">{shareInfo.wishlist_description}</p>
+                <p className="text-gray-500 text-sm">{shareInfo.wishlist_description}</p>
               )}
               {shareInfo.occasion && (
                 <span className="inline-block mt-3 px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm">
@@ -239,6 +256,11 @@ export default function PublicWishlist() {
             </div>
           )}
 
+          {/* Bannière */}
+          <div className="flex justify-center mb-6">
+            <img src="/wisherr-banner.png" alt="Wisherr" className="h-10" />
+          </div>
+
           {/* Header */}
           <div className="bg-gray-800/50 backdrop-blur-xl rounded-2xl p-6 mb-6 border border-white/10">
             <div className="flex items-center gap-4">
@@ -247,6 +269,11 @@ export default function PublicWishlist() {
               </div>
               <div className="flex-1">
                 <h1 className="text-2xl font-bold text-white">{shareInfo?.wishlist_title}</h1>
+                {shareInfo?.owner_name && (
+                  <p className="text-gray-400 text-sm mt-0.5">
+                    {t('Liste de')} <span className="text-purple-400">{shareInfo.owner_name}</span>
+                  </p>
+                )}
                 {shareInfo?.wishlist_description && (
                   <p className="text-gray-400 mt-1">{shareInfo.wishlist_description}</p>
                 )}
@@ -307,6 +334,32 @@ export default function PublicWishlist() {
                       )}
                       {item.price != null && (
                         <p className="text-sm text-purple-400 font-semibold mt-2">{item.price.toFixed(2)} €</p>
+                      )}
+                      
+                      {/* Tags/Attributs personnalisés */}
+                      {item.custom_attributes && Object.values(item.custom_attributes).some(v => v) && (
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {item.custom_attributes.tag_color && (
+                            <span className="px-2 py-0.5 bg-gray-700/60 text-gray-300 text-xs rounded-full border border-white/10">
+                              {item.custom_attributes.tag_color}
+                            </span>
+                          )}
+                          {item.custom_attributes.tag_model && (
+                            <span className="px-2 py-0.5 bg-gray-700/60 text-gray-300 text-xs rounded-full border border-white/10">
+                              {item.custom_attributes.tag_model}
+                            </span>
+                          )}
+                          {item.custom_attributes.tag_size && (
+                            <span className="px-2 py-0.5 bg-gray-700/60 text-gray-300 text-xs rounded-full border border-white/10">
+                              {t('Taille')}: {item.custom_attributes.tag_size}
+                            </span>
+                          )}
+                          {item.custom_attributes.tag_quantity && (
+                            <span className="px-2 py-0.5 bg-gray-700/60 text-gray-300 text-xs rounded-full border border-white/10">
+                              {t('Qté')}: {item.custom_attributes.tag_quantity}
+                            </span>
+                          )}
+                        </div>
                       )}
                       
                       {/* Status & Actions */}

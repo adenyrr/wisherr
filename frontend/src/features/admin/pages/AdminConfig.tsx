@@ -48,7 +48,7 @@ export default function AdminConfig() {
 
   const getConfigDescription = (key: string) => {
     switch (key) {
-      case 'site_name': return 'Nom du site affiché dans l\'en-tête';
+      case 'site_title': return 'Titre du site affiché dans le navigateur et le footer';
       case 'registration_open': return 'Autoriser les nouvelles inscriptions';
       case 'max_wishlists_per_user': return 'Nombre maximum de listes par utilisateur';
       case 'max_items_per_wishlist': return 'Nombre maximum d\'articles par liste';

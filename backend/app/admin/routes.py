@@ -11,7 +11,7 @@ import socket
 
 from app.models import (
     User, Wishlist, Item, Group, WishlistShare, 
-    SiteConfig, InternalError, Activity, AuditLog
+    SiteConfig, InternalError, AuditLog, Activity
 )
 from app.auth.deps import get_current_user
 from app.auth.routes import get_password_hash
@@ -90,6 +90,7 @@ class LogResponse(BaseModel):
     target_type: str
     target_id: Optional[int]
     target_name: Optional[str] = None
+    extra_data: Optional[dict] = None
     created_at: datetime
 
 class ReportErrorRequest(BaseModel):
@@ -667,6 +668,23 @@ async def delete_error(
     
     return {"ok": True}
 
+@router.delete("/errors")
+async def clear_all_errors(
+    admin: User = Depends(require_admin),
+    session: AsyncSession = Depends(get_async_session)
+):
+    """Supprimer toutes les erreurs"""
+    result = await session.exec(select(InternalError))
+    errors = result.all()
+    count = len(errors)
+    
+    for error in errors:
+        await session.delete(error)
+    
+    await session.commit()
+    
+    return {"ok": True, "deleted": count}
+
 # =====================================================
 # ROUTES - SIGNALEMENT D'ERREURS (ACCESSIBLE AUX USERS)
 # =====================================================
@@ -703,21 +721,35 @@ async def list_logs(
     session: AsyncSession = Depends(get_async_session)
 ):
     """Lister les logs d'audit et activités utilisateurs"""
+    import json
     responses = []
     
+    def parse_extra_data(data):
+        """Parse extra_data qui peut être un dict, une string JSON, ou None"""
+        if data is None:
+            return None
+        if isinstance(data, dict):
+            return data if data else None
+        if isinstance(data, str):
+            try:
+                parsed = json.loads(data)
+                return parsed if parsed else None
+            except (json.JSONDecodeError, TypeError):
+                return None
+        return None
+    
     # 1. Récupérer les activités utilisateurs (plus riches en infos)
-    activity_query = select(Activity).order_by(Activity.created_at.desc()).limit(limit)
+    activity_query = (
+        select(Activity, User.username)
+        .join(User, User.id == Activity.user_id, isouter=True)
+        .order_by(Activity.created_at.desc())
+        .limit(limit)
+    )
+    
     activity_result = await session.exec(activity_query)
     activities = activity_result.all()
     
-    for act in activities:
-        username = None
-        if act.user_id:
-            user_result = await session.exec(select(User).where(User.id == act.user_id))
-            user = user_result.first()
-            if user:
-                username = user.username
-        
+    for act, username in activities:
         responses.append(LogResponse(
             id=act.id,
             user_id=act.user_id,
@@ -726,26 +758,25 @@ async def list_logs(
             target_type=act.target_type,
             target_id=act.target_id,
             target_name=act.target_name,
+            extra_data=parse_extra_data(act.extra_data),
             created_at=act.created_at
         ))
     
     # 2. Récupérer les audit logs (actions admin)
-    audit_query = select(AuditLog)
+    audit_query = (
+        select(AuditLog, User.username)
+        .join(User, User.id == AuditLog.user_id, isouter=True)
+        .order_by(AuditLog.created_at.desc())
+        .limit(limit)
+    )
+    
     if action_filter:
         audit_query = audit_query.where(AuditLog.action == action_filter)
-    audit_query = audit_query.order_by(AuditLog.created_at.desc()).limit(limit)
     
     audit_result = await session.exec(audit_query)
     audit_logs = audit_result.all()
     
-    for log in audit_logs:
-        username = None
-        if log.user_id:
-            user_result = await session.exec(select(User).where(User.id == log.user_id))
-            user = user_result.first()
-            if user:
-                username = user.username
-        
+    for log, username in audit_logs:
         responses.append(LogResponse(
             id=log.id + 1000000,  # Offset pour éviter collision d'ID
             user_id=log.user_id,
@@ -753,7 +784,8 @@ async def list_logs(
             action=log.action,
             target_type=log.target_type,
             target_id=log.target_id,
-            target_name=log.target_name if hasattr(log, 'target_name') else None,
+            target_name=None,
+            extra_data=None,
             created_at=log.created_at
         ))
     
@@ -773,5 +805,22 @@ async def list_log_actions(admin: User = Depends(require_admin)):
             "user_admin_toggled"
         ]
     }
+
+@router.delete("/logs")
+async def clear_all_logs(
+    admin: User = Depends(require_admin),
+    session: AsyncSession = Depends(get_async_session)
+):
+    """Supprimer tous les logs d'audit"""
+    # Supprimer les audit logs
+    audit_result = await session.exec(select(AuditLog))
+    audit_logs = audit_result.all()
+    audit_count = len(audit_logs)
+    for log in audit_logs:
+        await session.delete(log)
+    
+    await session.commit()
+    
+    return {"ok": True, "deleted_audit_logs": audit_count}
 
 
