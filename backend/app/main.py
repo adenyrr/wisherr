@@ -80,14 +80,30 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         },
     )
 
+def sanitize_for_json(obj):
+    """Convertit récursivement les bytes en str pour JSON serialization"""
+    if isinstance(obj, bytes):
+        try:
+            return obj.decode('utf-8')
+        except:
+            return str(obj)
+    elif isinstance(obj, dict):
+        return {k: sanitize_for_json(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [sanitize_for_json(item) for item in obj]
+    return obj
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    # Nettoyer tous les bytes potentiels dans les erreurs
+    errors = sanitize_for_json(exc.errors())
+    body_content = sanitize_for_json(exc.body)
     return JSONResponse(
         status_code=422,
         content={
             "error": "Erreur de validation",
-            "details": exc.errors(),
-            "body": exc.body,
+            "details": errors,
+            "body": body_content,
             "path": str(request.url)
         },
     )
@@ -229,32 +245,49 @@ async def on_startup():
         import logging
         logging.warning("Redis initialization skipped: %s", e)
     
-    # Création des tables si besoin (pour dev/demo sans schema.sql)
-    # Note: En production avec Docker, le schema.sql est exécuté au démarrage de PostgreSQL.
-    # On désactive create_all pour éviter les conflits d'index entre SQLModel et schema.sql.
-    # Si vous utilisez ce backend sans le schema.sql, décommentez le bloc ci-dessous.
     import logging as startup_logging
     
-    # Vérifier si les tables existent déjà (créées par schema.sql)
+    # Vérifier si les tables existent déjà
     from sqlalchemy import inspect
     inspector = inspect(engine)
     tables_exist = "users" in inspector.get_table_names()
     
     if not tables_exist:
-        # Les tables n'existent pas, on les crée (cas sans schema.sql)
-        from sqlalchemy.exc import ProgrammingError
-        try:
-            SQLModel.metadata.create_all(engine, checkfirst=True)
-            startup_logging.info("Tables créées avec succès par SQLModel")
-        except ProgrammingError as e:
-            if "already exists" in str(e):
-                startup_logging.warning("Certains objets DB existent déjà: %s", e.orig)
-            else:
-                startup_logging.exception("Erreur lors de la création des tables: %s", e)
-        except Exception as e:
-            startup_logging.exception("Création des tables ignorée: %s", e)
+        # Essayer d'exécuter schema.sql s'il existe (prioritaire)
+        schema_path = "./schema.sql"
+        if os.path.exists(schema_path):
+            startup_logging.info("Exécution du schema.sql pour initialiser la base de données...")
+            try:
+                with open(schema_path, 'r') as f:
+                    schema_sql = f.read()
+                from sqlalchemy import text
+                from sqlalchemy.orm import Session as SASession
+                with engine.connect() as conn:
+                    # Utiliser raw_connection pour exécuter le script complet avec psycopg2
+                    raw_conn = conn.connection.dbapi_connection
+                    cursor = raw_conn.cursor()
+                    cursor.execute(schema_sql)
+                    raw_conn.commit()
+                    cursor.close()
+                startup_logging.info("Schema SQL exécuté avec succès!")
+            except Exception as e:
+                startup_logging.warning("Erreur schema.sql, fallback sur SQLModel: %s", e)
+                # Fallback sur SQLModel
+                try:
+                    SQLModel.metadata.create_all(engine, checkfirst=True)
+                    startup_logging.info("Tables créées avec succès par SQLModel")
+                except Exception as e2:
+                    startup_logging.exception("Erreur création tables: %s", e2)
+        else:
+            # Pas de schema.sql, utiliser SQLModel
+            startup_logging.info("Pas de schema.sql trouvé, utilisation de SQLModel...")
+            try:
+                SQLModel.metadata.create_all(engine, checkfirst=True)
+                startup_logging.info("Tables créées avec succès par SQLModel")
+            except Exception as e:
+                startup_logging.exception("Erreur création tables: %s", e)
     else:
-        startup_logging.info("Tables déjà créées par schema.sql, create_all ignoré")
+        startup_logging.info("Tables déjà créées, initialisation ignorée")
 
     # Ensure uploads directory exists
     try:

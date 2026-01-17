@@ -45,6 +45,11 @@ async def get_current_user_async(token: str = Depends(oauth2_scheme)):
             user = result.first()
             if not user:
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+            # Forcer le chargement de tous les attributs avant de fermer la session
+            # Accéder explicitement aux attributs pour les charger
+            _ = user.id, user.username, user.email, user.is_admin, user.created_at
+            # Détacher de la session pour éviter MissingGreenlet
+            session.expunge(user)
             return user
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")

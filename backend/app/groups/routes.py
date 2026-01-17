@@ -6,7 +6,7 @@ from datetime import datetime
 from pydantic import BaseModel
 
 from app.models import Group, GroupMember, User, Activity, Notification
-from app.auth.deps import get_current_user
+from app.auth.deps import get_current_user_async
 from app.core.async_db import async_engine
 
 router = APIRouter(prefix="/groups", tags=["groups"])
@@ -78,7 +78,7 @@ async def log_activity(session: AsyncSession, user_id: int, action_type: str,
 
 @router.get("", response_model=List[GroupListResponse])
 async def list_groups(
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_async),
     session: AsyncSession = Depends(get_async_session)
 ):
     """Liste tous les groupes de l'utilisateur (créés par lui ou dont il est membre)"""
@@ -122,12 +122,16 @@ async def list_groups(
 @router.post("", response_model=GroupResponse, status_code=status.HTTP_201_CREATED)
 async def create_group(
     payload: GroupCreate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_async),
     session: AsyncSession = Depends(get_async_session)
 ):
     """Créer un nouveau groupe"""
+    # Stocker les valeurs du user car il est détaché de la session
+    user_id = current_user.id
+    username = current_user.username
+    
     group = Group(
-        owner_id=current_user.id,
+        owner_id=user_id,
         name=payload.name,
         description=payload.description
     )
@@ -135,36 +139,44 @@ async def create_group(
     await session.commit()
     await session.refresh(group)
     
+    # Stocker les valeurs du groupe immédiatement après refresh
+    group_id = group.id
+    group_name = group.name
+    group_description = group.description
+    group_owner_id = group.owner_id
+    group_created_at = group.created_at
+    group_updated_at = group.updated_at
+    
     # Ajouter le créateur comme membre automatiquement
     owner_member = GroupMember(
-        group_id=group.id,
-        user_id=current_user.id,
-        added_by=current_user.id
+        group_id=group_id,
+        user_id=user_id,
+        added_by=user_id
     )
     session.add(owner_member)
     await session.commit()
     await session.refresh(owner_member)
     
+    # Stocker les valeurs du member immédiatement après refresh
+    member_id = owner_member.id
+    member_added_at = owner_member.added_at
+    
     # Log activity
-    await log_activity(session, current_user.id, "group_created", "group", group.id, group.name)
+    await log_activity(session, user_id, "group_created", "group", group_id, group_name)
     await session.commit()
     
-    # Refresh pour éviter MissingGreenlet après le dernier commit
-    await session.refresh(group)
-    await session.refresh(owner_member)
-    
     return GroupResponse(
-        id=group.id,
-        name=group.name,
-        description=group.description,
-        owner_id=group.owner_id,
-        created_at=group.created_at,
-        updated_at=group.updated_at,
+        id=group_id,
+        name=group_name,
+        description=group_description,
+        owner_id=group_owner_id,
+        created_at=group_created_at,
+        updated_at=group_updated_at,
         members=[MemberResponse(
-            id=owner_member.id,
-            user_id=current_user.id,
-            username=current_user.username,
-            added_at=owner_member.added_at
+            id=member_id,
+            user_id=user_id,
+            username=username,
+            added_at=member_added_at
         )],
         member_count=1
     )
@@ -172,7 +184,7 @@ async def create_group(
 @router.get("/{group_id}", response_model=GroupResponse)
 async def get_group(
     group_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_async),
     session: AsyncSession = Depends(get_async_session)
 ):
     """Récupérer un groupe avec ses membres"""
@@ -226,7 +238,7 @@ async def get_group(
 async def update_group(
     group_id: int,
     payload: GroupUpdate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_async),
     session: AsyncSession = Depends(get_async_session)
 ):
     """Modifier un groupe (propriétaire uniquement)"""
@@ -278,7 +290,7 @@ async def update_group(
 @router.delete("/{group_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_group(
     group_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_async),
     session: AsyncSession = Depends(get_async_session)
 ):
     """Supprimer un groupe (propriétaire uniquement)"""
@@ -303,7 +315,7 @@ async def delete_group(
 async def add_member(
     group_id: int,
     payload: GroupMemberAdd,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_async),
     session: AsyncSession = Depends(get_async_session)
 ):
     """Ajouter un membre au groupe par son pseudo ou email"""
@@ -393,7 +405,7 @@ async def add_member(
 async def remove_member(
     group_id: int,
     user_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_async),
     session: AsyncSession = Depends(get_async_session)
 ):
     """Retirer un membre du groupe"""
@@ -441,7 +453,7 @@ async def remove_member(
 async def check_user_exists(
     group_id: int,
     username: str,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_async),
     session: AsyncSession = Depends(get_async_session)
 ):
     """Vérifier si un utilisateur existe (pour autocomplétion)"""
