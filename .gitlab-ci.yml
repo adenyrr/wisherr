@@ -28,7 +28,7 @@ variables:
   POSTGRES_USER: wisherr
   POSTGRES_PASSWORD: wisherr
   # Optional registry variables (set in CI/CD settings)
-  DOCKER_IMAGE_PREFIX: "${CI_REGISTRY_IMAGE:-wisherr}"
+  DOCKER_IMAGE_PREFIX: "wisherr"
 
 # ---------------------------
 # Lint jobs
