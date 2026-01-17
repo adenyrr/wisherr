@@ -173,9 +173,9 @@ def get_wishlist(id: int, current_user: User = Depends(get_current_user)):
 
 @router.post("/wishlists", response_model=WishlistOut)
 def create_wishlist(payload: CreateWishlistRequest, current_user: User = Depends(get_current_user)):
-    sql = text("INSERT INTO wishlists (owner_id, title, description, occasion, is_public) VALUES (:owner_id, :title, :description, :occasion, :is_public) RETURNING id, owner_id, title, description, occasion, created_at")
+    sql = text("INSERT INTO wishlists (owner_id, title, description, occasion, is_public, is_archived) VALUES (:owner_id, :title, :description, :occasion, :is_public, :is_archived) RETURNING id, owner_id, title, description, occasion, created_at")
     with Session(engine) as session:
-        result = session.execute(sql, {"owner_id": current_user.id, "title": payload.title, "description": payload.description, "occasion": payload.occasion, "is_public": False})
+        result = session.execute(sql, {"owner_id": current_user.id, "title": payload.title, "description": payload.description, "occasion": payload.occasion, "is_public": False, "is_archived": False})
         session.commit()
         row = result.mappings().first()
         
