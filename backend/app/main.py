@@ -230,10 +230,18 @@ async def on_startup():
         logging.warning("Redis initialization skipped: %s", e)
     
     # Création des tables si besoin (pour dev/demo)
+    # Note: checkfirst=True est le défaut, mais on ignore les erreurs DuplicateTable/Object
+    from sqlalchemy.exc import ProgrammingError
     try:
-        SQLModel.metadata.create_all(engine)
+        SQLModel.metadata.create_all(engine, checkfirst=True)
+        logging.info("Tables créées ou vérifiées avec succès")
+    except ProgrammingError as e:
+        # Ignorer les erreurs de type "already exists" (index, table, constraint)
+        if "already exists" in str(e):
+            logging.warning("Certains objets DB existent déjà, création ignorée: %s", e.orig)
+        else:
+            logging.exception("Erreur lors de la création des tables: %s", e)
     except Exception as e:
-        import logging
         logging.exception("Création des tables ignorée (create_all) : %s", e)
 
     # Ensure uploads directory exists

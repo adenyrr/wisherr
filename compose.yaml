@@ -18,7 +18,7 @@ services:
       retries: 5
 
   backend:
-    build: ./backend
+    image: adenyr/wisherr-backend:latest
     restart: unless-stopped
     env_file:
       - ./.env
@@ -33,25 +33,19 @@ services:
         condition: service_healthy
     ports:
       - "8000:8000"
-    volumes:
-      - ./backend/app:/app/app
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/docs" ]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/docs', timeout=5)"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.prod
-      args:
-        REACT_APP_API_URL: ${REACT_APP_API_URL}
+    image: adenyr/wisherr-frontend:latest
     restart: unless-stopped
     env_file:
       - ./.env
     environment:
-      - REACT_APP_API_URL=
+      - REACT_APP_API_URL=${REACT_APP_API_URL}
     ports:
       - "8080:80"
     depends_on:
