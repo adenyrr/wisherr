@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../utils/store';
 import LucideIcon from './LucideIcon';
+import WisherrBanner from './WisherrBanner';
 import api from '../utils/api';
 
 interface SidebarProps {
@@ -70,13 +71,8 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="flex items-center justify-between h-16 px-6 border-b border-white/10">
-        <NavLink to="/dashboard" className="flex items-center gap-3" onClick={onClose}>
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-            <LucideIcon name="gift" size={22} className="text-white" />
-          </div>
-          <span className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-            Wisherr
-          </span>
+        <NavLink to="/dashboard" className="flex items-center" onClick={onClose}>
+          <WisherrBanner size="md" className="max-w-[140px]" />
         </NavLink>
         <button
           onClick={onClose}

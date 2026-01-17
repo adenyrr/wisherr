@@ -4,6 +4,7 @@ import { useAuthStore, useSiteStore } from '../../../shared/utils/store';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, Link } from 'react-router-dom';
 import LucideIcon from '../../../shared/components/LucideIcon';
+import WisherrBanner from '../../../shared/components/WisherrBanner';
 import Footer from '../../../shared/components/Footer';
 
 export default function Register() {
@@ -61,10 +62,9 @@ export default function Register() {
         <div className="w-full">
           {/* Logo & Branding */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/30 mb-4">
-              <LucideIcon name="gift" className="w-8 h-8 text-white" />
+            <div className="flex justify-center mb-6">
+              <WisherrBanner size="lg" className="max-w-xs" />
             </div>
-            <h1 className="text-3xl font-bold text-white mb-2">{siteTitle}</h1>
             <p className="text-gray-400">{t('Créez votre compte')}</p>
           </div>
 

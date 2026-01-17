@@ -229,20 +229,32 @@ async def on_startup():
         import logging
         logging.warning("Redis initialization skipped: %s", e)
     
-    # Création des tables si besoin (pour dev/demo)
-    # Note: checkfirst=True est le défaut, mais on ignore les erreurs DuplicateTable/Object
-    from sqlalchemy.exc import ProgrammingError
-    try:
-        SQLModel.metadata.create_all(engine, checkfirst=True)
-        logging.info("Tables créées ou vérifiées avec succès")
-    except ProgrammingError as e:
-        # Ignorer les erreurs de type "already exists" (index, table, constraint)
-        if "already exists" in str(e):
-            logging.warning("Certains objets DB existent déjà, création ignorée: %s", e.orig)
-        else:
-            logging.exception("Erreur lors de la création des tables: %s", e)
-    except Exception as e:
-        logging.exception("Création des tables ignorée (create_all) : %s", e)
+    # Création des tables si besoin (pour dev/demo sans schema.sql)
+    # Note: En production avec Docker, le schema.sql est exécuté au démarrage de PostgreSQL.
+    # On désactive create_all pour éviter les conflits d'index entre SQLModel et schema.sql.
+    # Si vous utilisez ce backend sans le schema.sql, décommentez le bloc ci-dessous.
+    import logging as startup_logging
+    
+    # Vérifier si les tables existent déjà (créées par schema.sql)
+    from sqlalchemy import inspect
+    inspector = inspect(engine)
+    tables_exist = "users" in inspector.get_table_names()
+    
+    if not tables_exist:
+        # Les tables n'existent pas, on les crée (cas sans schema.sql)
+        from sqlalchemy.exc import ProgrammingError
+        try:
+            SQLModel.metadata.create_all(engine, checkfirst=True)
+            startup_logging.info("Tables créées avec succès par SQLModel")
+        except ProgrammingError as e:
+            if "already exists" in str(e):
+                startup_logging.warning("Certains objets DB existent déjà: %s", e.orig)
+            else:
+                startup_logging.exception("Erreur lors de la création des tables: %s", e)
+        except Exception as e:
+            startup_logging.exception("Création des tables ignorée: %s", e)
+    else:
+        startup_logging.info("Tables déjà créées par schema.sql, create_all ignoré")
 
     # Ensure uploads directory exists
     try:

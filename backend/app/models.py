@@ -11,10 +11,6 @@ import json
 
 class User(SQLModel, table=True):
     __tablename__ = "users"
-    __table_args__ = (
-        Index("ix_users_username", "username"),
-        Index("ix_users_email", "email"),
-    )
     id: Optional[int] = Field(default=None, primary_key=True)
     username: str = Field(index=True, unique=True, max_length=64)
     email: str = Field(index=True, unique=True, max_length=255)
