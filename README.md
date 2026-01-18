@@ -55,8 +55,8 @@ Une application web moderne et complète pour créer, gérer et partager vos lis
 
 ```bash
 # Récupérer les fichiers de configuration depuis le dépôt
-curl -fsSL -o compose.yaml https://raw.githubusercontent.com/adenyrr/wisherr/main/compose.yaml
-curl -fsSL -o .env.example https://raw.githubusercontent.com/adenyrr/wisherr/main/.env.example
+curl -fsSL -o compose.yaml https://raw.githubusercontent.com/adenyrr/wisherr/refs/heads/master/compose.yaml
+curl -fsSL -o .env.example https://raw.githubusercontent.com/adenyrr/wisherr/refs/heads/master/.env.example
 
 # Copier et configurer
 cp .env.example .env

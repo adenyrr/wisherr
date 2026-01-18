@@ -54,8 +54,8 @@ A modern, full-featured web app to create, manage and share your wishlists. Wish
 ### Start
 ```bash
 # Download configuration files from the repository
-curl -fsSL -o compose.yaml https://raw.githubusercontent.com/adenyrr/wisherr/main/compose.yaml
-curl -fsSL -o .env.example https://raw.githubusercontent.com/adenyrr/wisherr/main/.env.example
+curl -fsSL -o compose.yaml https://raw.githubusercontent.com/adenyrr/wisherr/refs/heads/master/compose.yaml
+curl -fsSL -o .env.example https://raw.githubusercontent.com/adenyrr/wisherr/refs/heads/master/.env.example
 
 # Copy and configure
 cp .env.example .env
