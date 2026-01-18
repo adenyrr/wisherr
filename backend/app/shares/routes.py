@@ -13,12 +13,10 @@ from app.models import (
 )
 from app.auth.deps import get_current_user
 from app.core.async_db import async_engine
+from app.core.utils import get_site_config
 
 router = APIRouter(prefix="/shares", tags=["shares"])
 pwd_context = CryptContext(schemes=["argon2", "bcrypt"], deprecated="auto")
-
-# URL publique pour les liens de partage
-WISHERR_URL = os.getenv("WISHERR_URL", "http://localhost:8080")
 
 # =====================================================
 # SCHEMAS
@@ -149,7 +147,7 @@ async def list_my_shares(
             target_group_id=share.target_group_id,
             target_user_id=share.target_user_id,
             share_token=share.share_token,
-            share_url=f"{WISHERR_URL}/shared/{share.share_token}" if share.share_token else None,
+            share_url=f"{get_site_config('wisherr_url', 'http://localhost:8080')}/shared/{share.share_token}" if share.share_token else None,
             created_at=share.created_at,
             expires_at=share.expires_at,
             is_active=share.is_active
@@ -478,7 +476,8 @@ async def create_external_share(
     await session.commit()
     await session.refresh(share)
     
-    share_url = f"{WISHERR_URL}/shared/{share.share_token}"
+    wisherr_url = get_site_config('wisherr_url', 'http://localhost:8080')
+    share_url = f"{wisherr_url}/shared/{share.share_token}"
     await log_activity(
         session, current_user.id, "list_shared_external", "share", share.id,
         wishlist_title, wishlist_id, {"share_url": share_url, "share_token": share.share_token}
@@ -493,7 +492,7 @@ async def create_external_share(
         share_type=share.share_type,
         permission=share.permission,
         share_token=share.share_token,
-        share_url=f"{WISHERR_URL}/shared/{share.share_token}",
+        share_url=f"{wisherr_url}/shared/{share.share_token}",
         share_password=password,  # Retourné en clair à la création
         notify_on_reservation=share.notify_on_reservation,
         created_at=share.created_at,

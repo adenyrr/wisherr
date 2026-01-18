@@ -11,6 +11,7 @@ from app.models import User, BlacklistedToken, Activity
 from .schemas import UserResponse, TokenResponse, RegisterResponse, OkResponse
 from .deps import get_current_user, oauth2_scheme, get_current_user_async
 from pydantic import BaseModel, EmailStr
+from app.core.utils import get_site_config_bool
 import re
 import os
 import logging
@@ -77,7 +78,7 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
 @router.post("/register", response_model=RegisterResponse)
 @limiter.limit("5/minute")
 async def register(payload: RegisterRequest, request: Request, session: AsyncSession = Depends(get_async_session)):
-	if os.getenv("ENABLE_LOCAL_AUTH", "true").lower() not in ("1", "true", "yes"):
+	if not get_site_config_bool("enable_local_auth", True):
 		raise HTTPException(status_code=403, detail="L'authentification locale est désactivée.")
 	username = payload.username
 	email = payload.email
@@ -105,7 +106,7 @@ async def register(payload: RegisterRequest, request: Request, session: AsyncSes
 @router.post("/login", response_model=TokenResponse)
 @limiter.limit("10/minute")
 async def login(payload: LoginRequest, request: Request, session: AsyncSession = Depends(get_async_session)):
-	if os.getenv("ENABLE_LOCAL_AUTH", "true").lower() not in ("1", "true", "yes"):
+	if not get_site_config_bool("enable_local_auth", True):
 		raise HTTPException(status_code=403, detail="L'authentification locale est désactivée.")
 	username = payload.username
 	password = payload.password

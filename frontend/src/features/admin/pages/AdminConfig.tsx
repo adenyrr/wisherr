@@ -49,6 +49,13 @@ export default function AdminConfig() {
   const getConfigDescription = (key: string) => {
     switch (key) {
       case 'site_title': return 'Titre du site affiché dans le navigateur et le footer';
+      case 'wisherr_url': return 'URL publique du site (utilisée pour générer les liens de partage)';
+      case 'locale': return 'Langue par défaut du site';
+      case 'enable_local_auth': return 'Activer l\'authentification locale (username/password)';
+      case 'enable_oidc_auth': return 'Activer l\'authentification OIDC (OpenID Connect)';
+      case 'oidc_client_id': return 'Client ID pour l\'authentification OIDC';
+      case 'oidc_client_secret': return 'Client Secret pour l\'authentification OIDC';
+      case 'oidc_provider_url': return 'URL du fournisseur OIDC (Discovery URL)';
       case 'registration_open': return 'Autoriser les nouvelles inscriptions';
       case 'max_wishlists_per_user': return 'Nombre maximum de listes par utilisateur';
       case 'max_items_per_wishlist': return 'Nombre maximum d\'articles par liste';
@@ -150,9 +157,10 @@ export default function AdminConfig() {
                       </button>
                     ) : (
                       <input
-                        type="text"
+                        type={item.key.includes('secret') || item.key.includes('password') ? 'password' : 'text'}
                         value={editedValues[item.key] || ''}
                         onChange={(e) => handleValueChange(item.key, e.target.value)}
+                        placeholder={item.key.includes('secret') ? '••••••••' : ''}
                         className="w-full px-4 py-2 rounded-xl bg-gray-700 border border-white/10 text-white focus:outline-none focus:border-amber-500"
                       />
                     )}

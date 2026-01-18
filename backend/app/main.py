@@ -301,22 +301,33 @@ async def on_startup():
         from .models import SiteConfig
         import logging
 
+        # Configuration mapping: (key, env_var, default_value, value_type, description)
+        configs_to_init = [
+            ("site_title", "SITE_TITLE", "Wisherr", "string", "Titre du site affiché dans le navigateur et le footer"),
+            ("wisherr_url", "WISHERR_URL", "http://localhost:8080", "string", "URL publique du site (utilisée pour générer les liens de partage)"),
+            ("locale", "LOCALE", "fr", "string", "Langue par défaut du site"),
+            ("enable_local_auth", "ENABLE_LOCAL_AUTH", "true", "boolean", "Activer l'authentification locale (username/password)"),
+            ("enable_oidc_auth", "ENABLE_OIDC_AUTH", "false", "boolean", "Activer l'authentification OIDC"),
+            ("oidc_client_id", "OIDC_CLIENT_ID", "", "string", "Client ID pour l'authentification OIDC"),
+            ("oidc_client_secret", "OIDC_CLIENT_SECRET", "", "string", "Client Secret pour l'authentification OIDC (sensible)"),
+            ("oidc_provider_url", "OIDC_PROVIDER_URL", "", "string", "URL du fournisseur OIDC (Discovery URL)"),
+        ]
+
         with Session(engine) as session:
-            # Initialize SITE_TITLE from environment if not already in DB
-            site_title_env = os.getenv("SITE_TITLE", "Wisherr")
-            existing_title = session.exec(select(SiteConfig).where(SiteConfig.key == "site_title")).first()
-            if not existing_title:
-                logging.info("Initializing site_title in DB from environment: '%s'", site_title_env)
-                config = SiteConfig(
-                    key="site_title",
-                    value=site_title_env,
-                    value_type="string",
-                    description="Titre du site affiché dans le navigateur et le footer"
-                )
-                session.add(config)
-                session.commit()
-            else:
-                logging.info("site_title already configured in DB: '%s'", existing_title.value)
+            for key, env_var, default_value, value_type, description in configs_to_init:
+                existing = session.exec(select(SiteConfig).where(SiteConfig.key == key)).first()
+                if not existing:
+                    env_value = os.getenv(env_var, default_value)
+                    logging.info("Initializing %s in DB from environment: '%s'", key, env_value if key != "oidc_client_secret" else "***")
+                    config = SiteConfig(
+                        key=key,
+                        value=env_value,
+                        value_type=value_type,
+                        description=description
+                    )
+                    session.add(config)
+            session.commit()
+            logging.info("Site configuration initialized successfully")
     except Exception as e:
         import logging
         logging.exception("Failed to initialize site_config: %s", e)
@@ -326,14 +337,16 @@ async def on_startup():
         from sqlmodel import Session, select
         from .models import User
         from .auth.routes import get_password_hash
+        from .core.utils import get_site_config_bool
         import logging
 
-        ENABLE_LOCAL_AUTH = os.getenv("ENABLE_LOCAL_AUTH", "true").lower() in ("1", "true", "yes")
+        # Utiliser la config de la DB si disponible, sinon fallback sur .env
+        enable_local_auth = get_site_config_bool("enable_local_auth", True)
         admin_username = os.getenv("ADMIN_USERNAME")
         admin_email = os.getenv("ADMIN_EMAIL")
         admin_password = os.getenv("ADMIN_PASSWORD")
 
-        if ENABLE_LOCAL_AUTH and admin_username and admin_password:
+        if enable_local_auth and admin_username and admin_password:
             with Session(engine) as session:
                 existing = session.exec(select(User).where((User.username == admin_username) | (User.email == admin_email))).first()
                 if not existing:
