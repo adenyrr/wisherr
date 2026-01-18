@@ -90,4 +90,24 @@ CC BY-NC : adenyrr - Voir [LICENSE](LICENSE)
 - **Sécurité** : [@analyse-securite-code](agents)
 - **Documentation** : [@documentation-support](agents)
 
+## 📸 Screenshots
+
+
+- **Dashboard**
+
+  ![Dashboard](assets/dashboard.webp)
+
+- **Créer une liste**
+
+  ![Créer une liste](assets/addlist.webp)
+
+- **Ajouter un article**
+
+  ![Ajouter un article](assets/additem.webp)
+
+- **Partage public / Lien**
+
+  ![Partage public](assets/sharing.webp)
+
+
 ---
