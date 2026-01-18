@@ -14,7 +14,7 @@
 *Une application web moderne et complète pour créer, gérer et partager vos listes de souhaits*
 
 [🚀 Installation](INSTALLATION.md) • [📖 Documentation](USAGE.md) • [🔧 API](API.md) • [🏗️ Architecture](ARCHITECTURE.md) • [🗺️ Roadmap](ROADMAP.md) <br />
-• [English version](README_EN.md) •
+## • [English version](README_EN.md) •
 
 ---
 

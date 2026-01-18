@@ -13,7 +13,8 @@
 
 *A modern, full-featured web app to create, manage and share your wishlists*
 
-[🚀 Installation](INSTALLATION.md) • [📖 Documentation](USAGE.md) • [🔧 API](API.md) • [🏗️ Architecture](ARCHITECTURE.md) • [🗺️ Roadmap](ROADMAP.md) • [Français](README.md)
+[🚀 Installation](INSTALLATION.md) • [📖 Documentation](USAGE.md) • [🔧 API](API.md) • [🏗️ Architecture](ARCHITECTURE.md) • [🗺️ Roadmap](ROADMAP.md)<br />
+## • [Version française](README.md) •
 
 ---
 
