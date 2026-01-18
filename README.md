@@ -90,14 +90,13 @@ Premier utilisateur admin créé automatiquement (voir `.env`).
 
 ## 📄 Licence
 
-CC BY-NC : adenyrr - Voir [LICENSE](LICENSE)
-
+CC BY-NC : adenyrr - Voir [LICENCE](LICENCE)
 ## 👥 Équipe
 
-- **Architecture & Backend** : [@architecte-logiciel](agents)
-- **DevOps & Infrastructure** : [@sre-devops](agents)
-- **Sécurité** : [@analyse-securite-code](agents)
-- **Documentation** : [@documentation-support](agents)
+- **Architecture & Backend** : [@architecte-logiciel](./github/agents)
+- **DevOps & Infrastructure** : [@sre-devops](./github/agents)
+- **Sécurité** : [@analyse-securite-code](./github/agents)
+- **Documentation** : [@documentation-support](./github/agents)
 
 ## 📸 Screenshots
 

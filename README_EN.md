@@ -89,14 +89,14 @@ An initial admin user is created automatically (see `.env`).
 
 ## 📄 License
 
-CC BY-NC: adenyrr - See [LICENSE](LICENSE)
+CC BY-NC: adenyrr - See [LICENCE](LICENCE)
 
 ## 👥 Team
 
-- **Architecture & Backend**: [@architecte-logiciel](agents)
-- **DevOps & Infrastructure**: [@sre-devops](agents)
-- **Security**: [@analyse-securite-code](agents)
-- **Documentation**: [@documentation-support](agents)
+- **Architecture & Backend**: [@architecte-logiciel](./github/agents)
+- **DevOps & Infrastructure**: [@sre-devops](./github/agents)
+- **Security**: [@analyse-securite-code](./github/agents)
+- **Documentation**: [@documentation-support](./github/agents)
 
 ---
 
