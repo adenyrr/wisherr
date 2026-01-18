@@ -295,6 +295,32 @@ async def on_startup():
     except Exception:
         pass
 
+    # Initialize site_config with values from environment
+    try:
+        from sqlmodel import Session, select
+        from .models import SiteConfig
+        import logging
+
+        with Session(engine) as session:
+            # Initialize SITE_TITLE from environment if not already in DB
+            site_title_env = os.getenv("SITE_TITLE", "Wisherr")
+            existing_title = session.exec(select(SiteConfig).where(SiteConfig.key == "site_title")).first()
+            if not existing_title:
+                logging.info("Initializing site_title in DB from environment: '%s'", site_title_env)
+                config = SiteConfig(
+                    key="site_title",
+                    value=site_title_env,
+                    value_type="string",
+                    description="Titre du site affiché dans le navigateur et le footer"
+                )
+                session.add(config)
+                session.commit()
+            else:
+                logging.info("site_title already configured in DB: '%s'", existing_title.value)
+    except Exception as e:
+        import logging
+        logging.exception("Failed to initialize site_config: %s", e)
+
     # Create an initial admin user from environment variables if provided
     try:
         from sqlmodel import Session, select

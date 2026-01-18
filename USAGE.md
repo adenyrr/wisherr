@@ -163,6 +163,7 @@ curl -X POST http://localhost:8000/scrape \
     - `ENABLE_OIDC_AUTH`: Activer/désactiver OIDC
     - `ALLOWED_ORIGINS`: CORS origins
   - Modification via API `/admin/config/{key}`
+  - ⚠️ **Note** : `WISHERR_URL` (URL publique du site) est définie dans `.env` et utilisée pour générer les liens de partage. Elle doit être modifiée avant le déploiement (ex: `https://wisherr.example.com`).
 
 - **Logs d'actions**:
   - Historique des actions sensibles (création/suppression utilisateur, toggle admin, modifications config)

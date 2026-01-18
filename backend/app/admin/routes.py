@@ -176,6 +176,7 @@ async def update_config(
     )
     session.add(audit)
     await session.commit()
+    await session.refresh(config)  # Refresh après le 2e commit pour éviter MissingGreenlet
     
     return config
 
