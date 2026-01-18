@@ -20,7 +20,7 @@
 
 </div>
 
-This application was *vibe-coded* — prototyped with multiples agents and LLM.
+> ⚡ **Note :** This application was *vibe-coded* — prototyped with multiples agents and LLM.
 
 A modern, full-featured web app to create, manage and share your wishlists. Wisherr allows users to create wishlists, share them with friends and family (groups), and avoid duplicates using private reservations.
 
