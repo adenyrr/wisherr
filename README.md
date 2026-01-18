@@ -13,11 +13,14 @@
 
 *Une application web moderne et complète pour créer, gérer et partager vos listes de souhaits*
 
-[🚀 Installation](INSTALLATION.md) • [📖 Documentation](USAGE.md) • [🔧 API](API.md) • [🏗️ Architecture](ARCHITECTURE.md) • [🗺️ Roadmap](ROADMAP.md)
+[🚀 Installation](INSTALLATION.md) • [📖 Documentation](USAGE.md) • [🔧 API](API.md) • [🏗️ Architecture](ARCHITECTURE.md) • [🗺️ Roadmap](ROADMAP.md) <br />
+• [English version](README_EN.md) •
 
 ---
 
 </div>
+
+> ⚡ **Note :** Cette application a été *vibe‑codée* — développée à l'aide de plusieurs agents et LLM.
 
 Une application web moderne et complète pour créer, gérer et partager vos listes de souhaits. Wisherr permet aux utilisateurs de créer des listes de cadeaux, de les partager avec leurs proches (famille, amis, groupes), et d'éviter les doublons grâce aux réservations privées.
 
@@ -49,12 +52,18 @@ Une application web moderne et complète pour créer, gérer et partager vos lis
 - Docker 20.10+ et Docker Compose 2.0+
 
 ### Démarrage
+
 ```bash
-git clone https://github.com/votre-org/wisherr.git
-cd wisherr
+# Récupérer les fichiers de configuration depuis le dépôt
+curl -fsSL -o compose.yaml https://raw.githubusercontent.com/adenyrr/wisherr/main/compose.yaml
+curl -fsSL -o .env.example https://raw.githubusercontent.com/adenyrr/wisherr/main/.env.example
+
+# Copier et configurer
 cp .env.example .env
-# Éditer .env pour changer SECRET_KEY
-docker compose up -d --build
+nano .env
+
+# Démarrer la stack (utilise les images Docker Hub définies dans compose.yaml)
+docker compose up -d
 ```
 
 Accès :
@@ -92,22 +101,38 @@ CC BY-NC : adenyrr - Voir [LICENSE](LICENSE)
 
 ## 📸 Screenshots
 
+<div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;align-items:flex-start;">
+  <figure style="width:220px;margin:0;">
+    <a href="assets/dashboard_fr.webp"><img loading="lazy" src="assets/dashboard_fr.webp" alt="Dashboard" style="width:100%;height:auto;border-radius:8px;box-shadow:0 6px 18px rgba(2,6,23,0.6);"></a>
+    <figcaption style="text-align:center;font-size:0.9rem;margin-top:6px">Dashboard</figcaption>
+  </figure>
 
-- **Dashboard**
+  <figure style="width:220px;margin:0;">
+    <a href="assets/addlist_fr.webp"><img loading="lazy" src="assets/addlist_fr.webp" alt="Créer une liste" style="width:100%;height:auto;border-radius:8px;box-shadow:0 6px 18px rgba(2,6,23,0.6);"></a>
+    <figcaption style="text-align:center;font-size:0.9rem;margin-top:6px">Créer une liste</figcaption>
+  </figure>
 
-  ![Dashboard](assets/dashboard.webp)
+  <figure style="width:220px;margin:0;">
+    <a href="assets/additem_fr.webp"><img loading="lazy" src="assets/additem_fr.webp" alt="Ajouter un article" style="width:100%;height:auto;border-radius:8px;box-shadow:0 6px 18px rgba(2,6,23,0.6);"></a>
+    <figcaption style="text-align:center;font-size:0.9rem;margin-top:6px">Ajouter un article</figcaption>
+  </figure>
 
-- **Créer une liste**
+  <figure style="width:220px;margin:0;">
+    <a href="assets/sharing_fr.webp"><img loading="lazy" src="assets/sharing_fr.webp" alt="Partage public" style="width:100%;height:auto;border-radius:8px;box-shadow:0 6px 18px rgba(2,6,23,0.6);"></a>
+    <figcaption style="text-align:center;font-size:0.9rem;margin-top:6px">Partage public / Lien</figcaption>
+  </figure>
 
-  ![Créer une liste](assets/addlist.webp)
+  <figure style="width:220px;margin:0;">
+    <a href="assets/backend_API.webp"><img loading="lazy" src="assets/backend_API.webp" alt="API Backend" style="width:100%;height:auto;border-radius:8px;box-shadow:0 6px 18px rgba(2,6,23,0.6);"></a>
+    <figcaption style="text-align:center;font-size:0.9rem;margin-top:6px">API Backend (admin)</figcaption>
+  </figure>
 
-- **Ajouter un article**
+  <figure style="width:220px;margin:0;">
+    <a href="assets/shared_fr.webp"><img loading="lazy" src="assets/shared_fr.webp" alt="Liste partagée" style="width:100%;height:auto;border-radius:8px;box-shadow:0 6px 18px rgba(2,6,23,0.6);"></a>
+    <figcaption style="text-align:center;font-size:0.9rem;margin-top:6px">Liste partagée</figcaption>
+  </figure>
+</div>
 
-  ![Ajouter un article](assets/additem.webp)
-
-- **Partage public / Lien**
-
-  ![Partage public](assets/sharing.webp)
-
+> Cliquez sur une miniature pour ouvrir l'image en taille réelle.
 
 ---
